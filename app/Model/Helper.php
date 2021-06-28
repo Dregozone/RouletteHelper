@@ -51,6 +51,38 @@
             $this->data = json_decode(file_get_contents($this->filename));
         }
 
+        private function findBet($number) {
+            
+            // Default to waiting for 2 in a row
+            //$number = $number -1; // Wait for 3 in a row before acting
+
+            switch ($number) {
+                case 1: 
+                    return 1;
+
+                case 2:
+                    return 2;
+
+                case 3:
+                    return 4;
+
+                case 4:
+                    return 8;
+
+                case 5:
+                    return 16;
+
+                case 6:
+                    return 32;
+
+                case 7:
+                    return 64;
+
+                default: 
+                    return 'Bad situation';
+            };
+        }
+
         public function redBlackRecommendation() {
             
             $data = array_reverse( $this->data );
@@ -73,12 +105,12 @@
             
             if ( $this->redsInRow > 0 ) {
 
-                $bet = 2 ** $this->redsInRow;
+                $bet = $this->findBet( $this->redsInRow );
 
                 return "({$this->redsInRow}) £{$bet} Black";
             } else if ( $this->blacksInRow > 0 ) {
 
-                $bet = 2 ** $this->blacksInRow;
+                $bet = $this->findBet( $this->blacksInRow );
 
                 return "({$this->blacksInRow}) £{$bet} Red";
             } else {
@@ -109,12 +141,12 @@
 
             if ( $this->lowsInRow > 0 ) {
 
-                $bet = 2 ** $this->lowsInRow;
+                $bet = $this->findBet( $this->lowsInRow );
 
                 return "({$this->lowsInRow}) £{$bet} High";
             } else if ( $this->highsInRow > 0 ) {
 
-                $bet = 2 ** $this->highsInRow;
+                $bet = $this->findBet( $this->highsInRow );
 
                 return "({$this->highsInRow}) £{$bet} Low";
             } else {
@@ -145,12 +177,12 @@
 
             if ( $this->oddsInRow > 0 ) {
 
-                $bet = 2 ** $this->oddsInRow;
+                $bet = $this->findBet( $this->oddsInRow );
 
                 return "({$this->oddsInRow}) £{$bet} Even";
             } else if ( $this->evensInRow > 0 ) {
 
-                $bet = 2 ** $this->evensInRow;
+                $bet = $this->findBet( $this->evensInRow );
 
                 return "({$this->evensInRow}) £{$bet} Odd";
             } else {
