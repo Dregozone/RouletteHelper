@@ -19,9 +19,11 @@
         $controller->addNumber( $model->cleanse($_GET["write"]) );
     }
 
-    echo $view->title("Helper");
+    echo $view->title("Roulette Helper");
     echo $view->uiForm();
 
-    echo "<pre>";
-    print_r($model->getData());
-    echo "</pre>";
+    // Recommendations
+    echo $view->nextBetRecommendations();
+
+    // Look at the x most recently recorded rolls
+    echo $view->mostRecent(10);
