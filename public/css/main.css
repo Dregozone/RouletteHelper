@@ -1,0 +1,120 @@
+
+.main {
+    display: flex;
+    flex-direction: row;
+    gap: 1%;
+    padding: 0.5%;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    gap: 1%;
+    width: 60%;
+    padding: 0.5%;
+}
+
+.right {
+    width: 40%;
+    border-left: 1px dotted darkslategrey;
+    padding: 0.5%;
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1%;
+}
+
+.center {
+    text-align: center;
+}
+
+.messages {
+    text-align: center;
+    color: rgb(45, 45, 224);
+    margin: 2% 2% 0 2%;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+small {
+    display: inline-block;
+    width: 100%;
+    font-style: italic;
+}
+
+legend {
+    text-align: center;
+}
+
+label {
+    margin-right: 2%;
+}
+
+.recordARoll {
+    width: 90%;
+    margin: 1% 5% 3% 5%;
+}
+
+.recommendations {
+    margin-top: 2%;
+    padding-top: 2%;
+    border-top: 1px solid lightgrey;
+}
+
+.historical {
+    padding: 2%;
+}
+
+.custom {
+    font-size: 260%;
+}
+
+.tall {
+    min-height: 100px;
+}
+
+.custom-red {
+    background: red;
+    color: white;
+}
+.custom-black {
+    background: black;
+    color: white;
+}
+
+.custom-high {
+    background: green;
+    color: white;
+}
+.custom-low {
+    background: cyan;
+    color: black;
+}
+
+.custom-odd {
+    background: purple;
+    color: white;
+}
+.custom-even {
+    background: darkorange;
+    color: black;
+}
+
+.rouletteTable {
+    display: flex;
+    flex-direction: row;
+    gap: 1%;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 6%;
+}
+    .rouletteTable > div {
+        width: 16.6%;
+        border: 1px solid black;
+        text-align: center;
+    }

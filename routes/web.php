@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PagesController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [PagesController::class, 'main'])
+    ->name('main');
 
-//Route::get('/', [PagesController::class, 'home']);
+Route::post('/', [PagesController::class, 'action'])
+    ->name('action');
