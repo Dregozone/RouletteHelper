@@ -41,43 +41,15 @@
                     Recommendations
                 </h2>
 
-                <div>
-                    <table class="table table-sm table-hover table-striped">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Count</th>
-                                <th>Bet</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($counts as $type => $count)
-                                <tr>
-                                    <td>{{ $type }}</td>
-                                    <td>{{ $count }}</td>
-                                    <td>
-                                        @if ( $count >= 2 )
-                                            <div class="btn custom-{{ $type }}">
-                                                £{{ $stakes[$count - 1] ?? 'MAX' }}
-                                            </div>
-                                        @endif 
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-
                 <div class="rouletteTable">
                     <div>
                         <h3>
                             Low
                         </h3>
 
-                        @if ( $counts["low"] >= 2 )
+                        @if ( $counts["high"] >= 2 )
                             <div class="btn tall custom custom-low">
-                                £{{ $stakes[$counts["low"] - 1] ?? 'MAX' }}
+                                £{{ $stakes[$counts["high"] - 1] ?? 'x' }}
                             </div>
                         @else 
                             <div class="tall">
@@ -91,9 +63,9 @@
                             Even
                         </h3>
 
-                        @if ( $counts["even"] >= 2 )
+                        @if ( $counts["odd"] >= 2 )
                             <div class="btn tall custom custom-even">
-                                £{{ $stakes[$counts["even"] - 1] ?? 'MAX' }}
+                                £{{ $stakes[$counts["odd"] - 1] ?? 'x' }}
                             </div>
                         @else 
                             <div class="tall">
@@ -107,9 +79,9 @@
                             Red
                         </h3>
 
-                        @if ( $counts["red"] >= 2 )
+                        @if ( $counts["black"] >= 2 )
                             <div class="btn tall custom custom-red">
-                                £{{ $stakes[$counts["red"] - 1] ?? 'MAX' }}
+                                £{{ $stakes[$counts["black"] - 1] ?? 'x' }}
                             </div>
                         @else 
                             <div class="tall">
@@ -123,9 +95,9 @@
                             Black
                         </h3>
 
-                        @if ( $counts["black"] >= 2 )
+                        @if ( $counts["red"] >= 2 )
                             <div class="btn tall custom custom-black">
-                                £{{ $stakes[$counts["black"] - 1] ?? 'MAX' }}
+                                £{{ $stakes[$counts["red"] - 1] ?? 'x' }}
                             </div>
                         @else 
                             <div class="tall">
@@ -139,9 +111,9 @@
                             Odd
                         </h3>
 
-                        @if ( $counts["odd"] >= 2 )
+                        @if ( $counts["even"] >= 2 )
                             <div class="btn tall custom custom-odd">
-                                £{{ $stakes[$counts["odd"] - 1] ?? 'MAX' }}
+                                £{{ $stakes[$counts["even"] - 1] ?? 'x' }}
                             </div>
                         @else 
                             <div class="tall">
@@ -155,9 +127,9 @@
                             High
                         </h3>
 
-                        @if ( $counts["high"] >= 2 )
+                        @if ( $counts["low"] >= 2 )
                             <div class="btn tall custom custom-high">
-                                £{{ $stakes[$counts["high"] - 1] ?? 'MAX' }}
+                                £{{ $stakes[$counts["low"] - 1] ?? 'x' }}
                             </div>
                         @else 
                             <div class="tall">
@@ -206,16 +178,16 @@
                                 <tr>
                                     <td>{{ $historical->num }}</td>
                                     
-                                    <td style="color: {{ $historical->isRed  ? 'red' : 'black' }};">
-                                        {{ $historical->isRed  ? 'Red' : 'Black' }}
+                                    <td style="color: {{ $historical->isRed  ? 'red' : ($historical->num == 0 ? 'lightgrey' : 'black') }};">
+                                        {{ $historical->isRed  ? 'Red' : ($historical->num == 0 ? '-' : 'Black') }}
                                     </td>
 
-                                    <td style="color: {{ $historical->isEven ? 'darkorange' : 'purple' }};">
-                                        {{ $historical->isEven ? 'Even' : 'Odd' }}
+                                    <td style="color: {{ $historical->isEven ? 'darkorange' : ($historical->num == 0 ? 'lightgrey' : 'purple') }};">
+                                        {{ $historical->isEven ? 'Even' : ($historical->num == 0 ? '-' : 'Odd') }}
                                     </td>
                                     
-                                    <td style="color: {{ $historical->isHigh ? 'green' : 'cyan' }};">
-                                        {{ $historical->isHigh ? 'High' : 'Low' }}
+                                    <td style="color: {{ $historical->isHigh ? 'green' : ($historical->num == 0 ? 'lightgrey' : 'cyan') }};">
+                                        {{ $historical->isHigh ? 'High' : ($historical->num == 0 ? '-' : 'Low') }}
                                     </td>
                                     
                                     <td>

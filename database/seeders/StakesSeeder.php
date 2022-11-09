@@ -25,5 +25,10 @@ class StakesSeeder extends Seeder
             'name' => 'Safe',
             'stakes' => '[0,1,1,2,4,null,null,null]',
         ]);
+
+        Stake::create([
+            'name' => 'SuperSafe',
+            'stakes' => '[0,0,1,1,2,null,null,null]',
+        ]);
     }
 }
