@@ -1,4 +1,4 @@
-* text=auto
+* text=auto eol=lf
 
 *.blade.php diff=html
 *.css diff=css
@@ -6,5 +6,6 @@
 *.md diff=markdown
 *.php diff=php
 
-/.github export-ignore
 CHANGELOG.md export-ignore
+README.md export-ignore
+.github/workflows/browser-tests.yml export-ignore

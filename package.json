@@ -1,18 +1,22 @@
 {
+    "$schema": "https://www.schemastore.org/package.json",
     "private": true,
+    "type": "module",
     "scripts": {
-        "dev": "npm run development",
-        "development": "mix",
-        "watch": "mix watch",
-        "watch-poll": "mix watch -- --watch-options-poll=1000",
-        "hot": "mix watch --hot",
-        "prod": "npm run production",
-        "production": "mix --production"
+        "build": "vite build",
+        "dev": "vite"
     },
-    "devDependencies": {
-        "axios": "^0.21",
-        "laravel-mix": "^6.0.6",
-        "lodash": "^4.17.19",
-        "postcss": "^8.1.14"
+    "dependencies": {
+        "@tailwindcss/vite": "^4.1.11",
+        "autoprefixer": "^10.4.20",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^3.1",
+        "tailwindcss": "^4.0.7",
+        "vite": "^8.0.0"
+    },
+    "optionalDependencies": {
+        "@rollup/rollup-linux-x64-gnu": "4.9.5",
+        "@tailwindcss/oxide-linux-x64-gnu": "^4.0.1",
+        "lightningcss-linux-x64-gnu": "^1.29.1"
     }
 }

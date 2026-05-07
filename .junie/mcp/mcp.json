@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "C:\\Users\\aclea\\.config\\herd\\bin\\php85\\php.exe",
+            "args": [
+                "C:\\Users\\aclea\\Herd\\livewire-starter\\artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
