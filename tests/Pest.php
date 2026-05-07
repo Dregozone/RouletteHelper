@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Historical;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,6 +18,40 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
+
+/*
+|--------------------------------------------------------------------------
+| Shared Test Helpers
+|--------------------------------------------------------------------------
+*/
+
+/**
+ * Insert Historical records with deterministic created_at timestamps so that
+ * the first element of $nums becomes the oldest record and the last becomes
+ * the most recent.  The component orders results DESC by created_at, so after
+ * insertion the component will display the last element first.
+ *
+ * @param  int[]  $nums  Numbers in chronological order (oldest → newest)
+ */
+function insertRollsOrdered(array $nums): void
+{
+    $count = count($nums);
+    $records = [];
+
+    foreach ($nums as $index => $num) {
+        // Start at $count seconds ago so the last element is always at least 1 second
+        // in the past, guaranteeing any subsequent Historical::create() call is newer.
+        $secondsAgo = $count - $index;
+        $timestamp = now()->subSeconds($secondsAgo)->toDateTimeString();
+        $records[] = [
+            'num' => $num,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ];
+    }
+
+    Historical::insert($records);
+}
 
 /*
 |--------------------------------------------------------------------------

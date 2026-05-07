@@ -16,6 +16,8 @@ new #[Layout('layouts.blank')] class extends Component
 
     public int $newRollNumber = 0;
 
+    public string $behaviour = "SuperSafe"; // This is the suggested betting behaviour, later it will be possible to select between different behaviours
+
     public function mount()
     {
          $this->reloadData();
@@ -23,8 +25,8 @@ new #[Layout('layouts.blank')] class extends Component
 
     private function findHistoricals()
     {
-        $this->historicals = Historical:: 
-              select(
+        $this->historicals = Historical::query()
+            ->select(
                 'historicals.id',
                 'historicals.num',
                 'historicals.created_at',
@@ -34,7 +36,7 @@ new #[Layout('layouts.blank')] class extends Component
                 'isHigh',
                 'isRed',
                 'isBlack',
-              )
+            )
             ->join('possible_outcomes', 'historicals.num', '=', 'possible_outcomes.num')
             ->orderBy('historicals.created_at', 'DESC')
             ->take(15)
@@ -154,13 +156,17 @@ new #[Layout('layouts.blank')] class extends Component
             $prevRoll = $currentRoll;
         }
         
-        $behaviour = "SuperSafe";////
-        $this->stakes = json_decode(
-            Stake::query() 
-                ->where('name', $behaviour)
-                ->first()
-                ->stakes
-            );
+        $stakeData = Stake::query()
+            ->where('name', $this->behaviour)
+            ->first();
+
+        if (! $stakeData) {
+            Flux::toast('No stake data found for the selected behaviour!', 'error');
+            $this->stakes = [];
+            return;
+        }
+
+        $this->stakes = json_decode($stakeData->stakes);
     }
 
     public function doAction(string $actionName, ?int $id = null)
