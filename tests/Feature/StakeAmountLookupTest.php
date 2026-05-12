@@ -12,6 +12,11 @@ test('the component uses the SuperSafe betting strategy by default', function ()
     expect(Livewire::test('pages::main.page')->get('behaviour'))->toBe('SuperSafe');
 });
 
+test('the component exposes every available betting mode for the selector', function () {
+    expect(Livewire::test('pages::main.page')->get('availableBehaviours'))
+        ->toBe(['Plain', 'Safe', 'SuperSafe']);
+});
+
 test('the stakes array is populated from the SuperSafe strategy on mount', function () {
     $stakes = Livewire::test('pages::main.page')->get('stakes');
 
@@ -60,4 +65,14 @@ test('a streak beyond the stake array explains that the stake ladder has no conf
 
     Livewire::test('pages::main.page')
         ->assertSee('Stake not set for this step.');
+});
+
+test('switching betting mode reloads the stake ladder and closes the selector modal', function () {
+    $component = Livewire::test('pages::main.page')
+        ->set('showBehaviourModal', true)
+        ->call('setBehaviour', 'Plain');
+
+    expect($component->get('behaviour'))->toBe('Plain');
+    expect($component->get('stakes'))->toBe([0, 1, 2, 4, 8, 16, 32, 64]);
+    expect($component->get('showBehaviourModal'))->toBeFalse();
 });

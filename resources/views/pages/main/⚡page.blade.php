@@ -15,13 +15,70 @@ new #[Layout('layouts.blank'), Title('Spin Dashboard')] class extends Component
 
     public array $stakes = [];
 
+    public array $availableBehaviours = [];
+
+    public array $availableBehaviourStakes = [];
+
     public ?int $newRollNumber = null;
 
     public string $behaviour = 'SuperSafe';
 
+    public bool $showBehaviourModal = false;
+
     public function mount(): void
     {
+        $this->loadAvailableBehaviours();
         $this->reloadData();
+    }
+
+    private function loadAvailableBehaviours(): void
+    {
+        $stakeModes = Stake::query()
+            ->select('id', 'name', 'stakes')
+            ->orderBy('id')
+            ->get();
+
+        $this->availableBehaviours = $stakeModes
+            ->pluck('name')
+            ->all();
+
+        $this->availableBehaviourStakes = $stakeModes
+            ->mapWithKeys(fn (Stake $stake): array => [
+                $stake->name => json_decode($stake->stakes, true) ?? [],
+            ])
+            ->all();
+
+        if ($this->availableBehaviours !== [] && ! in_array($this->behaviour, $this->availableBehaviours, true)) {
+            $this->behaviour = $this->availableBehaviours[0];
+        }
+    }
+
+    public function openBehaviourModal(): void
+    {
+        $this->showBehaviourModal = true;
+    }
+
+    public function setBehaviour(string $behaviour): void
+    {
+        $this->loadAvailableBehaviours();
+
+        if (! in_array($behaviour, $this->availableBehaviours, true)) {
+            Flux::toast('That betting mode is not available.', 'error');
+
+            return;
+        }
+
+        if ($behaviour === $this->behaviour) {
+            $this->showBehaviourModal = false;
+
+            return;
+        }
+
+        $this->behaviour = $behaviour;
+        $this->reloadData();
+        $this->showBehaviourModal = false;
+
+        Flux::toast('Betting mode updated!', 'success');
     }
 
     private function findHistoricals(): void
@@ -47,6 +104,10 @@ new #[Layout('layouts.blank'), Title('Spin Dashboard')] class extends Component
 
     public function reloadData(): void
     {
+        if ($this->availableBehaviours === [] || $this->availableBehaviourStakes === []) {
+            $this->loadAvailableBehaviours();
+        }
+
         $this->findHistoricals();
 
         $this->counts = [
@@ -150,18 +211,14 @@ new #[Layout('layouts.blank'), Title('Spin Dashboard')] class extends Component
             $prevRoll = $currentRoll;
         }
 
-        $stakeData = Stake::query()
-            ->where('name', $this->behaviour)
-            ->first();
-
-        if (! $stakeData) {
+        if (! array_key_exists($this->behaviour, $this->availableBehaviourStakes)) {
             Flux::toast('No stake data found for the selected behaviour!', 'error');
             $this->stakes = [];
 
             return;
         }
 
-        $this->stakes = json_decode($stakeData->stakes, true) ?? [];
+        $this->stakes = $this->availableBehaviourStakes[$this->behaviour];
     }
 
     public function doAction(string $actionName, ?int $id = null): void
@@ -215,6 +272,7 @@ new #[Layout('layouts.blank'), Title('Spin Dashboard')] class extends Component
     $latestRoll = $historicals[0] ?? null;
     $latestRollDisplay = $latestRoll['num'] ?? '-';
     $historyCount = count($historicals);
+    $behaviourCount = count($availableBehaviours);
 
     $recommendations = [
         [
@@ -407,13 +465,101 @@ new #[Layout('layouts.blank'), Title('Spin Dashboard')] class extends Component
                             </div>
                             <div class="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
                                 <dt class="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-zinc-400">Mode</dt>
-                                <dd class="mt-2 text-sm font-semibold text-white">{{ $behaviour }}</dd>
+                                <dd class="mt-2">
+                                    <button
+                                        type="button"
+                                        wire:click="openBehaviourModal"
+                                        class="group flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left transition hover:border-emerald-300/60 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                                        aria-label="Choose betting mode"
+                                        aria-haspopup="dialog"
+                                        aria-controls="behaviour-selector-modal"
+                                        aria-expanded="{{ $showBehaviourModal ? 'true' : 'false' }}"
+                                    >
+                                        <span>
+                                            <span class="block text-sm font-semibold text-white">{{ $behaviour }}</span>
+                                            <span class="mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-emerald-200/80">{{ $behaviourCount }} modes</span>
+                                        </span>
+
+                                        <span class="rounded-full border border-white/10 px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-zinc-200 transition group-hover:border-emerald-300/50 group-hover:text-white">
+                                            Change
+                                        </span>
+                                    </button>
+                                </dd>
                             </div>
                         </dl>
                     </form>
                 </div>
             </section>
         </div>
+
+        <flux:modal
+            id="behaviour-selector-modal"
+            name="behaviour-selector-modal"
+            class="max-w-3xl md:min-w-[42rem]"
+            focusable
+            wire:model="showBehaviourModal"
+        >
+            <div class="max-h-[80vh] space-y-6 overflow-y-auto pr-1">
+                <div class="space-y-2 text-center sm:text-left">
+                    <p class="text-xs font-semibold uppercase tracking-[0.28em] text-zinc-500 dark:text-zinc-400">Betting mode</p>
+                    <flux:heading id="behaviour-selector-heading" size="xl">Choose the stake ladder</flux:heading>
+                    <flux:text>
+                        Each mode applies a different multiplier ladder to every live bet. Pick one to reload the board immediately.
+                    </flux:text>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" role="group" aria-labelledby="behaviour-selector-heading">
+                    @foreach ($availableBehaviours as $mode)
+                        @php
+                            $modeStakes = $availableBehaviourStakes[$mode] ?? [];
+                            $modePreview = collect(array_slice($modeStakes, 0, 5))
+                                ->map(fn ($stake) => $stake === null ? '--' : '£'.$stake)
+                                ->implode(' · ');
+                            $isCurrentMode = $mode === $behaviour;
+                        @endphp
+
+                        <button
+                            type="button"
+                            wire:key="behaviour-option-{{ $mode }}"
+                            wire:click="setBehaviour('{{ $mode }}')"
+                            wire:loading.attr="disabled"
+                            wire:target="setBehaviour"
+                            class="relative flex h-full flex-col gap-4 overflow-hidden rounded-[1.6rem] border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-950 {{ $isCurrentMode ? 'border-emerald-300/70 bg-emerald-500/10 shadow-lg shadow-emerald-500/10 dark:border-emerald-400/40 dark:bg-emerald-400/10' : 'border-zinc-950/8 bg-white hover:border-emerald-300/60 hover:bg-emerald-500/[0.04] dark:border-white/10 dark:bg-zinc-950/70 dark:hover:border-emerald-400/40 dark:hover:bg-emerald-400/[0.08]' }}"
+                            aria-pressed="{{ $isCurrentMode ? 'true' : 'false' }}"
+                            aria-label="Select {{ $mode }} betting mode"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">Mode</p>
+                                    <p class="mt-2 text-xl font-semibold tracking-tight text-zinc-950 dark:text-white">{{ $mode }}</p>
+                                </div>
+
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.2em] {{ $isCurrentMode ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-200' : 'bg-zinc-950/[0.05] text-zinc-600 dark:bg-white/[0.06] dark:text-zinc-300' }}">
+                                    {{ $isCurrentMode ? 'Current' : 'Select' }}
+                                </span>
+                            </div>
+
+                            <div class="rounded-[1.25rem] border border-zinc-950/8 bg-zinc-950/[0.03] px-4 py-3 dark:border-white/10 dark:bg-white/[0.04]">
+                                <p class="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-zinc-500 dark:text-zinc-400">First five steps</p>
+                                <p class="mt-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">{{ $modePreview !== '' ? $modePreview : 'No stakes configured' }}</p>
+                            </div>
+
+                            <p class="text-sm text-zinc-600 dark:text-zinc-300">
+                                {{ $isCurrentMode ? 'Already active. Select again to close the picker.' : 'Switch now and recalculate every live recommendation with this ladder.' }}
+                            </p>
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="flex flex-col-reverse gap-3 border-t border-zinc-950/8 pt-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm text-zinc-600 dark:text-zinc-300">The recommendations board updates as soon as you choose a mode.</p>
+
+                    <flux:modal.close>
+                        <flux:button variant="filled" class="w-full justify-center sm:w-auto">Keep current mode</flux:button>
+                    </flux:modal.close>
+                </div>
+            </div>
+        </flux:modal>
 
         <div class="grid gap-6 lg:grid-cols-3">
             <section aria-labelledby="board-heading" class="rounded-[2rem] border border-white/60 bg-white/85 p-5 shadow-2xl shadow-zinc-950/8 backdrop-blur-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/25 sm:p-6 lg:col-span-2">
