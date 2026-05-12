@@ -11,8 +11,7 @@ test('no recommendations are live when all streaks are below 2', function () {
     insertRollsOrdered([5]); // single roll, no streak reaches 2
 
     Livewire::test('pages::main.page')
-        ->assertSee('0 live signals')
-        ->assertSee('Waiting');
+        ->assertSee('No bet live');
 });
 
 test('low recommendation is shown when the high streak reaches 2', function () {

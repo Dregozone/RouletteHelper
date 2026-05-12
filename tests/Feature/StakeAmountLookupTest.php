@@ -59,5 +59,5 @@ test('a streak beyond the stake array explains that the stake ladder has no conf
     Historical::insert($records);
 
     Livewire::test('pages::main.page')
-        ->assertSee('The streak is live, but the configured stake ladder has no value at this position.');
+        ->assertSee('Stake not set for this step.');
 });
