@@ -67,3 +67,12 @@ test('multiple different rolls can be recorded consecutively', function () {
 
     expect(Historical::count())->toBe(5);
 });
+
+test('out of range rolls are rejected', function () {
+    Livewire::test('pages::main.page')
+        ->set('newRollNumber', 37)
+        ->call('doAction', 'recordARoll')
+        ->assertHasErrors(['newRollNumber']);
+
+    expect(Historical::count())->toBe(0);
+});

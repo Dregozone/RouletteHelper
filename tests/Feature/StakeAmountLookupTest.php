@@ -49,8 +49,8 @@ test('a streak of 5 shows the SuperSafe stake for index 4 which is 2', function 
     Livewire::test('pages::main.page')->assertSee('£2');
 });
 
-test('a streak beyond the stake array shows x for null values', function () {
-    // SuperSafe index 5 = null → displays as £x
+test('a streak beyond the stake array explains that the stake ladder has no configured value', function () {
+    // SuperSafe index 5 = null → the recommendation stays live but cannot display a configured stake.
     $records = [];
     for ($i = 0; $i < 6; $i++) {
         $timestamp = now()->subSeconds(6 - $i)->toDateTimeString();
@@ -58,5 +58,6 @@ test('a streak beyond the stake array shows x for null values', function () {
     }
     Historical::insert($records);
 
-    Livewire::test('pages::main.page')->assertSee('£x');
+    Livewire::test('pages::main.page')
+        ->assertSee('The streak is live, but the configured stake ladder has no value at this position.');
 });

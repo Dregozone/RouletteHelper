@@ -7,10 +7,12 @@ use Livewire\Livewire;
 
 beforeEach(fn () => $this->seed(DatabaseSeeder::class));
 
-test('no stake amount is shown when all streaks are below 2', function () {
+test('no recommendations are live when all streaks are below 2', function () {
     insertRollsOrdered([5]); // single roll, no streak reaches 2
 
-    Livewire::test('pages::main.page')->assertDontSee('£');
+    Livewire::test('pages::main.page')
+        ->assertSee('0 live signals')
+        ->assertSee('Waiting');
 });
 
 test('low recommendation is shown when the high streak reaches 2', function () {
