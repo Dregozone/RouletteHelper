@@ -15,17 +15,17 @@ on:
       - workos
 
 permissions:
-  contents: write
+  contents: read # set to write if you re-enable the "Commit Changes" step below
 
 jobs:
   quality:
     runs-on: ubuntu-latest
     environment: Testing
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.4'
 
@@ -41,7 +41,7 @@ jobs:
         run: composer lint
 
       # - name: Commit Changes
-      #   uses: stefanzweifel/git-auto-commit-action@v7
+      #   uses: stefanzweifel/git-auto-commit-action@4a55954c782fc1ea30b9056cd3e7a2b40ca8887d # v7.2.0
       #   with:
       #     commit_message: fix code style
       #     commit_options: '--no-verify'
