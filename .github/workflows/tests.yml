@@ -23,7 +23,7 @@ jobs:
     environment: Testing
     strategy:
       matrix:
-        php-version: [ "8.4", "8.5" ]
+        php-version: ["8.5"]
 
     steps:
       - name: Checkout code
