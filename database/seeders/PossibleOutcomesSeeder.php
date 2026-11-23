@@ -312,18 +312,18 @@ class PossibleOutcomesSeeder extends Seeder
                 'isHigh' => true,
                 'isRed' => true,
                 'isBlack' => false,
-            ],            
+            ],
         ];
 
         foreach ($possibleOutcomes as $num => $data) {
             PossibleOutcome::create([
                 'num' => $num,
-                'isEven' => $data["isEven"],
-                'isOdd' => $data["isOdd"],
-                'isLow' => $data["isLow"],
-                'isHigh' => $data["isHigh"],
-                'isRed' => $data["isRed"],
-                'isBlack' => $data["isBlack"],
+                'isEven' => $data['isEven'],
+                'isOdd' => $data['isOdd'],
+                'isLow' => $data['isLow'],
+                'isHigh' => $data['isHigh'],
+                'isRed' => $data['isRed'],
+                'isBlack' => $data['isBlack'],
             ]);
         }
     }

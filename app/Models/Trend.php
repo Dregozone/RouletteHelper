@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Trend extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'trends';
 
     protected $fillable = [
