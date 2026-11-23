@@ -61,6 +61,15 @@ composer_install() {
   return $code
 }
 
+# Before Composer: its package:discover boots the app, and some apps touch the database as they boot
+# (approximation turns on SQLite's WAL mode), which fails when database/database.sqlite isn't there.
+if [ -f artisan ]; then
+  [ -f .env ] || cp .env.example .env 2>/dev/null
+  if [ -d database ] && [ ! -f database/database.sqlite ] && { [ ! -f .env ] || ! grep -q '^DB_CONNECTION=' .env || grep -q '^DB_CONNECTION=sqlite' .env; }; then
+    touch database/database.sqlite
+  fi
+fi
+
 if [ -f composer.json ]; then
   if [ ! -f vendor/autoload.php ] || [ composer.lock -nt vendor/autoload.php ]; then
     step "composer install" composer_install
@@ -78,7 +87,6 @@ if [ -f package-lock.json ]; then
 fi
 
 if [ -f artisan ]; then
-  [ -f .env ] || cp .env.example .env 2>/dev/null
   # Judged by the key landing in .env: orbit's key:generate set the key yet exited non-zero.
   key_generate() { php artisan key:generate --no-interaction --force; grep -q '^APP_KEY=base64' .env; }
   if [ -f .env ] && ! grep -q '^APP_KEY=base64' .env; then step "artisan key:generate" key_generate; fi
