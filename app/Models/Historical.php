@@ -12,6 +12,6 @@ class Historical extends Model
     protected $table = 'historicals';
 
     protected $fillable = [
-        'num'
+        'num',
     ];
 }
