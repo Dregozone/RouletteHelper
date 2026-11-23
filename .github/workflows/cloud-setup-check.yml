@@ -1,0 +1,73 @@
+# Life OS's cloud worker (docs/office/30 in life-os): checks that a Claude Code cloud session can still
+# set this project up, so a session started from the phone doesn't spend its time fighting
+# installs. Kept by Life OS (docs/office/cloud-worker/cloud-setup-check.yml); edit it there.
+#
+# It runs .claude/hooks/cloud-setup.sh the way a cloud session does, except that GitHub's package
+# zips are skipped (a cloud session's GitHub proxy refuses them), so every package must come from
+# the git builder. Red here means the next cloud session would struggle: read the log below.
+name: cloud setup check
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - composer.json
+      - composer.lock
+      - package.json
+      - package-lock.json
+      - '.claude/hooks/**'
+
+permissions:
+  contents: read
+
+jobs:
+  cloud-setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: '8.5'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+
+      - name: Flux Pro (the cloud environment's network secret does this in a session)
+        env:
+          FLUX_USERNAME: ${{ secrets.FLUX_USERNAME }}
+          FLUX_LICENSE_KEY: ${{ secrets.FLUX_LICENSE_KEY }}
+        run: |
+          if ! grep -q 'livewire/flux-pro' composer.json; then echo "No Flux Pro here."; exit 0; fi
+          if [ -z "$FLUX_USERNAME" ] || [ -z "$FLUX_LICENSE_KEY" ]; then
+            echo "::error::Add FLUX_USERNAME and FLUX_LICENSE_KEY under Settings → Secrets and variables → Actions (the same values as the Dependabot secrets)."
+            exit 1
+          fi
+          composer config --global http-basic.composer.fluxui.dev "$FLUX_USERNAME" "$FLUX_LICENSE_KEY"
+
+      - name: Set up as a cloud session would
+        env:
+          CLAUDE_CODE_REMOTE: 'true'
+          CLOUD_SETUP_SKIP_ZIPS: '1'
+        run: |
+          out="$(bash .claude/hooks/cloud-setup.sh)"
+          echo "$out"
+          if ! echo "$out" | grep -q 'ok: composer install' || echo "$out" | grep -q 'FAILED'; then
+            echo "::error::Cloud setup would fail: $out"
+            echo "----- /tmp/cloud-setup.log (last 120 lines)"
+            tail -n 120 /tmp/cloud-setup.log
+            exit 1
+          fi
+          php artisan --version
